@@ -12,6 +12,8 @@
 #define LED_GPS 51  //gps ready led
 #define LED_BT  53  //blue-tooth connected led
 
+#define GPS_FIX 8   //gps fix pin
+
 // Hardware serial
 #define mySerial Serial3
 Adafruit_GPS GPS(&mySerial);
@@ -58,6 +60,11 @@ void setup() {
   pinMode(LED_SD,  OUTPUT);
   pinMode(LED_GPS, OUTPUT);
   pinMode(LED_BT,  OUTPUT);
+  pinMode(GPS_FIX, INPUT);
+  digitalWrite(LED_RDY, LOW);
+  digitalWrite(LED_SD, LOW);
+  digitalWrite(LED_GPS, LOW);
+  digitalWrite(LED_BT, LOW);
 }
 
 #ifdef __AVR__
@@ -90,6 +97,11 @@ void useInterrupt(boolean v) {
 
 uint32_t timer = millis();
 void loop() {
+  readGPS();
+}
+
+// Reads data from GPS and blinks LED accordingly
+void readGPS() {
   // in case you are not using the interrupt above, you'll
   // need to 'hand query' the GPS, not suggested :(
   if (! usingInterrupt) {
@@ -99,4 +111,11 @@ void loop() {
     if (GPSECHO)
       if (c) Serial.print(c);
   }
+  
+  // if we get a fix, turn off the led
+  if (digitalRead(GPS_FIX)) //reads a 1 for no fix
+    digitalWrite(LED_GPS, HIGH);
+  else 
+    digitalWrite(LED_GPS, LOW);
+    
 }
