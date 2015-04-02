@@ -29,17 +29,7 @@ void setup() {
   // Initialize Serial
   Serial.begin(115200);
   
-  // 9600 NMEA is the default baud rate for MTK - some use 4800
-  GPS.begin(9600);
-  mySerial.begin(9600);
-  
-  // Turn on RMC (recommended minimum and GGA (fix data) including altitude
-  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
-  // Set update rate to 5 Hz
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);
-  GPS.sendCommand(PMTK_API_SET_FIX_CTL_5HZ);
-  // Request updates on antenna status, comment out to keep quiet
-  GPS.sendCommand(PGCMD_ANTENNA);
+  GPS_Setup();
   
   // the nice thing about this code is you can have a timer0 interrupt go off
   // every 1 millisecond, and read data from the GPS for you. that makes the
@@ -54,17 +44,7 @@ void setup() {
   // Ask for firmware version
   mySerial.println(PMTK_Q_RELEASE);
   
-  
-  // Set LED pin modes
-  pinMode(LED_RDY, OUTPUT);
-  pinMode(LED_SD,  OUTPUT);
-  pinMode(LED_GPS, OUTPUT);
-  pinMode(LED_BT,  OUTPUT);
-  pinMode(GPS_FIX, INPUT);
-  digitalWrite(LED_RDY, LOW);
-  digitalWrite(LED_SD, LOW);
-  digitalWrite(LED_GPS, LOW);
-  digitalWrite(LED_BT, LOW);
+  LED_Setup();
 }
 
 #ifdef __AVR__
@@ -98,6 +78,36 @@ void useInterrupt(boolean v) {
 uint32_t timer = millis();
 void loop() {
   readGPS();
+}
+
+
+// LED pin setup
+void LED_Setup() {
+  // Set LED pin modes
+  pinMode(LED_RDY, OUTPUT);
+  pinMode(LED_SD,  OUTPUT);
+  pinMode(LED_GPS, OUTPUT);
+  pinMode(LED_BT,  OUTPUT);
+  pinMode(GPS_FIX, INPUT);
+  digitalWrite(LED_RDY, LOW);
+  digitalWrite(LED_SD, LOW);
+  digitalWrite(LED_GPS, LOW);
+  digitalWrite(LED_BT, LOW);
+}
+
+// Setup GPS
+void GPS_Setup() {
+  // 9600 NMEA is the default baud rate for MTK - some use 4800
+  GPS.begin(9600);
+  mySerial.begin(9600);
+  
+  // Turn on RMC (recommended minimum and GGA (fix data) including altitude
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+  // Set update rate to 5 Hz
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);
+  GPS.sendCommand(PMTK_API_SET_FIX_CTL_5HZ);
+  // Request updates on antenna status, comment out to keep quiet
+  GPS.sendCommand(PGCMD_ANTENNA);
 }
 
 // Reads data from GPS and blinks LED accordingly
